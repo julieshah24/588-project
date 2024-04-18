@@ -3,13 +3,13 @@ import tempfile
 import time
 from tqdm import tqdm
 
-HYPERPARAMETER_DIR =  "/nfs/turbo/justincj-turbo/kaulg/spam/hp_search"
+HYPERPARAMETER_DIR =  "spam/hp_search"
 
 learning_rates = [1e-4,1e-5,1e-6,1e-7]
 
 for lr in tqdm(learning_rates):
     hp_folder_name = (
-        "no_train_eval_wd_0_lr_" + str(lr).replace('.','_') + '/'
+        "wd_0_lr_" + str(lr).replace('.','_') + '/'
     )
     name = 'spam_roberta_lr_' + str(lr)
     output_path = os.path.join(HYPERPARAMETER_DIR, hp_folder_name)
@@ -18,8 +18,8 @@ for lr in tqdm(learning_rates):
     os.makedirs(output_path, exist_ok=True)
 
     SBATCH_STRING = """#!/bin/sh
-#SBATCH --account=justincj1 
-#SBATCH --partition=spgpu
+#SBATCH --account=YOUR_ACCOUNT 
+#SBATCH --partition=YOUR_partition
 #SBATCH --job-name={name}
 #SBATCH --output={slurm_log_dir}
 #SBATCH --ntasks-per-node=1
@@ -28,13 +28,9 @@ for lr in tqdm(learning_rates):
 #SBATCH --time=24:00:00
 #SBATCH --mem=45GB
 
-export PATH=/nfs/turbo/justincj-turbo/kaulg/miniconda3/envs/spam/bin:$PATH
-
-conda init
-
 conda activate spam 
 
-cd /nfs/turbo/justincj-turbo/kaulg/spam
+cd /spam/588-project/
 
 python train_model.py --learning_rate {lr}
     
